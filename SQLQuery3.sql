@@ -1,0 +1,1 @@
+﻿SELECT * FROM Recettes WHERE Id = 2;
