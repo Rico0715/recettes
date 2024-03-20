@@ -13,11 +13,13 @@ namespace recettes
     public partial class SaisieRecetteForm : Form
     {
         private List<Ingredient> ingredients = new List<Ingredient>();
-
+        private string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=recettes;Integrated Security=True";
+        private SqlConnection connection;
         public SaisieRecetteForm()
         {
             InitializeComponent();
-            
+            connection = new SqlConnection(connectionString);
+
 
         }
 
@@ -93,6 +95,81 @@ namespace recettes
             }
         }
 
+        private void listBoxIngredients_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBoxIngredients_TextChanged(object sender, EventArgs e)
+        {
+            // Effacer les suggestions précédentes
+            listBoxSuggestions.Items.Clear();
+
+            // Récupérer le texte entré dans le textBoxIngredient
+            string recherche = textBoxIngredients.Text.ToLower();
+
+            // Vérifier si le textBoxIngredient n'est pas vide
+            if (!string.IsNullOrEmpty(recherche))
+            {
+                // Récupérer les suggestions à partir de la base de données
+                List<string> suggestions = GetSuggestionsFromDatabase(recherche);
+
+                // Afficher les suggestions dans la listBoxSuggestions
+                foreach (string suggestion in suggestions)
+                {
+                    listBoxSuggestions.Items.Add(suggestion);
+                }
+            }
+        }
+        private List<string> GetSuggestionsFromDatabase(string recherche)
+        {
+            List<string> suggestions = new List<string>();
+
+            // Connexion à la base de données et exécution de la requête SQL pour récupérer les suggestions
+            string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=recettes;Integrated Security=True";
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT NomIngre FROM Ingredients WHERE NomIngre LIKE @Recherche + '%'";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Recherche", recherche);
+
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string suggestion = reader["NomIngre"].ToString();
+
+                    // Vérifier si la suggestion commence par la recherche
+                    if (suggestion.ToLower().StartsWith(recherche))
+                    {
+                        suggestions.Add(suggestion);
+                    }
+                }
+            }
+
+            return suggestions;
+        }
+
+        private void listBoxSuggestions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxSuggestions.SelectedItem != null)
+            {
+                // Récupérer l'ingrédient sélectionné
+                string ingredientSelectionne = listBoxSuggestions.SelectedItem.ToString();
+
+                // Remplacer le contenu du textBoxIngredients par l'ingrédient sélectionné
+                textBoxIngredients.Text = ingredientSelectionne;
+
+                // Sélectionner tout le texte dans le textBoxIngredients
+                textBoxIngredients.SelectAll();
+            }
+        }
+
+        private void textBoxNomRecette_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

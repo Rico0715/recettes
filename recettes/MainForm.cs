@@ -24,5 +24,13 @@ namespace recettes
             saisieRecetteForm.ShowDialog();
 
         }
+
+        private void btnSaisieIngredients_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Click sur le bouton");
+            SaisieIngredientsForm saisieIngredientsForm = new SaisieIngredientsForm();
+
+            saisieIngredientsForm.ShowDialog();
+        }
     }
 }
